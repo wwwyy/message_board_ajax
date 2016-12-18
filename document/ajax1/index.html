@@ -1,0 +1,190 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<link href="style/weibo.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="znsArea">
+<!--留言-->
+     <div class="takeComment">
+        <textarea name="textarea" class="takeTextField" id="tijiaoText"></textarea>
+        <div class="takeSbmComment">
+            <input type="button" id="btn1" class="inputs" value="" />
+            <span>(可按 Enter 回复)</span>
+        </div>
+    </div>
+<!--已留-->
+    <div class="commentOn">
+        <div class="messList" id="div1" style="height:502px">
+           <!--  <div class="reply">
+                <p class="replyContent">卫士，新款卫士将推出总共14种车身式样。其中， XS旅行款车型售价为32295英镑(约33.6万元)。</p>
+                <p class="operation">
+                    <span class="replyTime">2018-09-08 16:37:60</span>
+                    <span class="handle">
+                        <a href="javascript:;" class="top">0</a>
+                        <a href="javascript:;" class="down_icon">0</a>
+                        <a href="javascript:;" class="cut">删除</a>
+                    </span>
+                </p>
+            </div> -->
+        </div>
+        <div class="page" id="page">
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/jquery-3.1.1.min.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    init(1)
+   
+    $('#btn1').click(function(){
+        var $val = $('#tijiaoText').val()
+        var num = parseInt($('#page .active').html())
+        if (!num) {
+            num=1;
+        }
+        $.ajax({
+            url:'weibo.php',
+            data:{
+                act:'add',
+                content:$val,
+            },
+            success:function(json){
+               if (!JSON.parse(json).error) {
+                    init(num)
+               }
+            }
+        }); 
+    })
+    $('#page').click(function(ev){
+         if ($(ev.target).attr('href')) {
+             init(parseInt($(ev.target).html()))
+         }
+    })
+    $('#div1').click(function(ev){
+       if ($(ev.target).attr('class')=='cut') {
+        var num = parseInt($('#page .active').html())
+        if ($('#div1')[0].children.length==1) {
+            num = num-1;
+            if (num-1<=0) {
+                num = 1;
+            }
+        }
+              $.ajax({
+                url:'weibo.php',
+                data:{
+                    act:'del',
+                    id:$(ev.target).parent().parent().parent().attr('index')
+                },
+                success:function(){
+                    init(num)
+                }
+           })
+       }
+       if ($(ev.target).attr('class')=='top') {
+          
+            var num = parseInt($('#page .active').html())
+            var topNum = parseInt($(ev.target).html())
+            $.ajax({
+                url:'weibo.php',
+                data:{
+                    act:'acc',
+                    id:$(ev.target).parent().parent().parent().attr('index')
+                },
+                success:function(){
+                    init(num)
+                }
+            })
+       }
+       if ($(ev.target).attr('class')=='down_icon') {
+            var num = parseInt($('#page .active').html())
+            var topNum = parseInt($(ev.target).html())
+            $.ajax({
+                url:'weibo.php',
+                data:{
+                    act:'ref',
+                    id:$(ev.target).parent().parent().parent().attr('index')
+                },
+                success:function(){
+                    init(num)
+                }
+            })
+       }
+    })
+    function add0(nub){
+        return nub<10?'0'+nub:''+nub;
+    }
+     function init(n){
+          $.ajax({
+            url:'weibo.php',
+            data:{
+                act:'get',
+                page:n
+            },
+            success:function(array){
+                var arr = eval("("+array+")")
+                var str1 = '';
+               for(var k in arr){
+                   var time = arr[k].time
+                    var newDate = new Date(time*1000)
+                    var nowtime = newDate.getFullYear()+'-'+add0((newDate.getMonth()+1))+'-'+add0(newDate.getDay())+' '+add0(newDate.getHours())+':'+add0(newDate.getMinutes())+':'+add0(newDate.getSeconds());
+                    str1+=`
+                    <div class="reply" index="${arr[k].id}">
+                        <p class="replyContent">${arr[k].content}</p>
+                        <p class="operation">
+                            <span class="replyTime">${nowtime}</span>
+                            <span class="handle">
+                                <a href="javascript:;" class="top" time="${arr[k].time}">${arr[k].acc}</a>
+                                <a href="javascript:;" class="down_icon" time="${arr[k].time}">${arr[k].ref}</a>
+                                <a href="javascript:;" class="cut">删除</a>
+                            </span>
+                        </p>
+                    </div>
+                    `
+               }
+               $.ajax({
+                    url:'weibo.php',
+                    data:{
+                        act:'get_page_count',
+                    },
+                    success:function(json){
+                        var str2 = ''
+                        // 初始 1-5
+                        if (n<4) {
+                            if (JSON.parse(json).count<6) {
+                                for (var i = 0; i < JSON.parse(json).count; i++) {
+                                    str2+='<a href="javascript:;" >'+(i+1)+'</a>'
+                                }
+                                $('#page').html(str2)
+                                $('#page a').eq(n-1).attr('class','active')
+                            } else {
+                                 for (var i = 0; i < 5; i++) {
+                                    str2+='<a href="javascript:;" >'+(i+1)+'</a>'
+                                }
+                                $('#page').html(str2)
+                                $('#page a').eq(n-1).attr('class','active')
+                            }
+                            
+                        } else if (n+3>JSON.parse(json).count) {  // 没有足够多的页的时候
+                                for (var i = JSON.parse(json).count-5; i < JSON.parse(json).count; i++) {
+                                    str2+='<a href="javascript:;" >'+(i+1)+'</a>'
+                                }
+                                 $('#page').html(str2)
+                                $('#page a').eq((n-JSON.parse(json).count-6)%5).attr('class','active')
+                        } else {  // 有足够多的页的时候
+                             for (var i = n-2; i < n+3; i++) {
+                                    str2+='<a href="javascript:;" >'+i+'</a>'
+                                }
+                                 $('#page').html(str2)
+                                $('#page a').eq(2).attr('class','active')
+                        }
+                    }
+               })
+               $('#div1').html(str1)
+            }
+        })
+    }
+</script>
+</html>
