@@ -28,7 +28,7 @@
 */
 
 //创建数据库之类的
-$db=@mysql_connect('localhost', 'root', '') or @mysql_connect('localhost', 'root', 'admin');
+$db=@mysql_connect('localhost', 'root', '') or @mysql_connect('localhost', 'root', 'root');
 
 mysql_query("set names 'utf8'");
 mysql_query('CREATE DATABASE zns_ajax');
