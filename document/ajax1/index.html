@@ -43,7 +43,7 @@
         var $val = $('#tijiaoText').val()
         var num = parseInt($('#page .active').html())
         if (!num) {
-            num=1;
+            num = 1;
         }
         $.ajax({
             url:'weibo.php',
@@ -64,15 +64,15 @@
          }
     })
     $('#div1').click(function(ev){
-       if ($(ev.target).attr('class')=='cut') {
-        var num = parseInt($('#page .active').html())
-        if ($('#div1')[0].children.length==1) {
-            num = num-1;
-            if (num-1<=0) {
-                num = 1;
+        if ($(ev.target).attr('class')=='cut') {
+            var num = parseInt($('#page .active').html())
+            if ($('#div1')[0].children.length==1) {
+                num = num-1;
+                if (num-1<=0) {
+                    num = 1;
+                }
             }
-        }
-              $.ajax({
+            $.ajax({
                 url:'weibo.php',
                 data:{
                     act:'del',
@@ -82,9 +82,9 @@
                     init(num)
                 }
            })
-       }
-       if ($(ev.target).attr('class')=='top') {
-          
+        }
+
+        if ($(ev.target).attr('class')=='top') {
             var num = parseInt($('#page .active').html())
             var topNum = parseInt($(ev.target).html())
             $.ajax({
@@ -97,8 +97,8 @@
                     init(num)
                 }
             })
-       }
-       if ($(ev.target).attr('class')=='down_icon') {
+        }
+        if ($(ev.target).attr('class')=='down_icon') {
             var num = parseInt($('#page .active').html())
             var topNum = parseInt($(ev.target).html())
             $.ajax({
@@ -111,13 +111,13 @@
                     init(num)
                 }
             })
-       }
+        }
     })
     function add0(nub){
         return nub<10?'0'+nub:''+nub;
     }
-     function init(n){
-          $.ajax({
+    function init(n){
+        $.ajax({
             url:'weibo.php',
             data:{
                 act:'get',
@@ -126,8 +126,8 @@
             success:function(array){
                 var arr = eval("("+array+")")
                 var str1 = '';
-               for(var k in arr){
-                   var time = arr[k].time
+                for(var k in arr){
+                    var time = arr[k].time
                     var newDate = new Date(time*1000)
                     var nowtime = newDate.getFullYear()+'-'+add0((newDate.getMonth()+1))+'-'+add0(newDate.getDay())+' '+add0(newDate.getHours())+':'+add0(newDate.getMinutes())+':'+add0(newDate.getSeconds());
                     str1+=`
